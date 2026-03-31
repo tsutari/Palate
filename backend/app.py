@@ -1,5 +1,6 @@
 import os
 from google import genai
+from google.genai import types
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -33,7 +34,10 @@ def chat(req: ChatRequest):
 
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
-        model="gemini-1.5-flash",
+        model="gemini-2.0-flash",
         contents=req.message,
+        config=types.GenerateContentConfig(
+            system_instruction="You are Palate, an AI music assistant. Help the user with music recommendations and playlist ideas. Be concise."
+        ),
     )
     return {"reply": response.text}
