@@ -3,4 +3,4 @@ uvicorn
 python-dotenv
 pinecone
 spotipy
-google-generativeai
+google-genai

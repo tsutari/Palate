@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+from google import genai
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -31,10 +31,9 @@ def chat(req: ChatRequest):
     if not api_key:
         return {"reply": "Gemini API key not configured."}
 
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
-        system_instruction="You are Palate, an AI music assistant. Help the user with music recommendations and playlist ideas. Be concise.",
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(
+        model="gemini-1.5-flash",
+        contents=req.message,
     )
-    response = model.generate_content(req.message)
     return {"reply": response.text}
