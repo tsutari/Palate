@@ -30,14 +30,25 @@ export default function App() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  function handleSend() {
+  async function handleSend() {
     const text = input.trim()
     if (!text) return
-    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text }])
+    const userMessage = text
+    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: userMessage }])
     setInput('')
-    setTimeout(() => {
-      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', text: "I'm not connected to anything yet — but I'll be able to help soon!" }])
-    }, 600)
+    const thinkingId = Date.now() + 1
+    setMessages(prev => [...prev, { id: thinkingId, role: 'assistant', text: 'Thinking...' }])
+    try {
+      const res = await fetch(`${API_URL}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage }),
+      })
+      const data = await res.json()
+      setMessages(prev => prev.map(m => m.id === thinkingId ? { ...m, text: data.reply } : m))
+    } catch {
+      setMessages(prev => prev.map(m => m.id === thinkingId ? { ...m, text: 'Something went wrong.' } : m))
+    }
   }
 
   function handleKeyDown(e) {
